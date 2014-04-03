@@ -5,11 +5,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.*;
 import android.widget.GridView;
-
-import java.util.Locale;
 
 public class MainActivity extends Activity implements ActionBar.TabListener {
 
@@ -42,7 +39,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         int sections = 4;
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager(), this,sections);
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager(), this, sections);
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -57,8 +54,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
                 actionBar.setSelectedNavigationItem(position);
             }
         });
-        String [] sectionNames = {"In Theaters","DVD Releases","Opening","Box Office"};
-        for(int i=0;i<sections;i++) {
+        String[] sectionNames = {"In Theaters", "DVD Releases", "Opening", "Box Office"};
+        for (int i = 0; i < sections; i++) {
             actionBar.addTab(actionBar.newTab().setText(sectionNames[i]).setTabListener(this));
         }
     }
@@ -114,7 +111,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
                 "http://api.rottentomatoes.com/api/public/v1.0/lists/movies/box_office.json?page_limit=24&page=1&country=us&apikey="
         };
 
-        public SectionsPagerAdapter(FragmentManager fm, Context context,int sections) {
+        public SectionsPagerAdapter(FragmentManager fm, Context context, int sections) {
             super(fm);
             this.context = context;
             this.sections = sections;
@@ -124,8 +121,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            GridAdapter gridAdapter = new GridAdapter(this.context,LIST[position]);
-            return PlaceholderFragment.newInstance(position, context,gridAdapter);
+            GridAdapter gridAdapter = new GridAdapter(this.context, LIST[position]);
+            return PlaceholderFragment.newInstance(position, context, gridAdapter);
         }
 
         @Override
@@ -147,11 +144,12 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 
         private int position;
         private GridAdapter gridAdapter;
+
         /**
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PlaceholderFragment newInstance(int sectionNumber, Context context,GridAdapter gridAdapter) {
+        public static PlaceholderFragment newInstance(int sectionNumber, Context context, GridAdapter gridAdapter) {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
@@ -168,7 +166,6 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             GridView gridview = (GridView) rootView.findViewById(R.id.gridView);
-            Log.e(TAG,"Create view" + position);
             gridview.setAdapter(gridAdapter);
             return rootView;
         }

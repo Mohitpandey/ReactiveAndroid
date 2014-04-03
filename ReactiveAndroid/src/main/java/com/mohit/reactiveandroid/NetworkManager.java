@@ -28,37 +28,16 @@ public class NetworkManager {
 
     private OkHttpClient client = new OkHttpClient();
 
-    private static final String TAG = "r3ader";
+    private static final String TAG = "reactive";
 
     public NetworkManager() {
     }
 
     public Observable<String> getData(final String url) {
-
-        /*
-        .onErrorReturn(e->{
-            return "{movies:[]}";
-        });
-         */
         return  Async.start(()->getContent(url),Schedulers.io());
-//        return Observable.create((Observer<? super String> observer) ->{
-//                try {
-//                    Log.d("r3ader", "downloading on "+Thread.currentThread().toString());
-//                    String data = getContent(url);
-//                    Log.d("r3ader", "done downloading on "+Thread.currentThread().toString());
-//                    observer.onNext(data);
-//                    observer.onCompleted();
-//                } catch (Exception e) {
-//                    observer.onError(e);
-//                }
-//
-//                return Subscriptions.empty();
-//        })
-//        .subscribeOn(Schedulers.io());
     }
 
     public String getContent(String urlString) {
-        Log.e(TAG,"calling "+urlString);
         try {
             HttpURLConnection connection = client.open(new URL(urlString));
             byte [] bytes = readData(connection.getInputStream(), connection);
@@ -76,7 +55,6 @@ public class NetworkManager {
             byte[] data = new byte[0];
             final int contentLength = connection.getContentLength();
             if (contentLength > 0) {
-                Log.d(TAG,"length "+contentLength);
                 outputStream = new ByteArrayOutputStream(contentLength);
             } else {
                 outputStream = new ByteArrayOutputStream();
