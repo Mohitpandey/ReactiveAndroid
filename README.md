@@ -9,12 +9,12 @@ Place the key under src/main/res/values/key.xml (or any other name). key.xml is 
 save you some work.
 
 Here is what the contents of key.xml look like:
-
+<pre><code>
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ROTTEN_KEY">YOUR DEVELOPER KEY</string>
 </resources>
-
+</code></pre>
 
 In progress:
 
