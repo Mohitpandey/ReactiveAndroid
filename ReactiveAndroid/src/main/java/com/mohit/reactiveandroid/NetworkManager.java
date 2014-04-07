@@ -28,7 +28,7 @@ public class NetworkManager {
 
     private OkHttpClient client = new OkHttpClient();
 
-    private static final String TAG = "reactive";
+    private static final String TAG = NetworkManager.class.getName();
 
     public NetworkManager() {
     }
@@ -40,11 +40,13 @@ public class NetworkManager {
     public String getContent(String urlString) {
         try {
             HttpURLConnection connection = client.open(new URL(urlString));
+            Log.d(TAG,"making connection : "+urlString);
             byte [] bytes = readData(connection.getInputStream(), connection);
             return new String(bytes, "UTF-8");
         } catch (Exception e) {
             Log.e(TAG,"What!! be specific in exception handling",e);
-            return "{movies:[]}";
+            //return "{movies:[]}";
+            throw new RuntimeException("test");
         }
     }
 

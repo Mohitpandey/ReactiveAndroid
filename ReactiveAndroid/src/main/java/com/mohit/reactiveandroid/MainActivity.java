@@ -2,10 +2,13 @@ package com.mohit.reactiveandroid;
 
 import android.app.*;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.*;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 public class MainActivity extends Activity implements ActionBar.TabListener {
@@ -25,18 +28,20 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
      */
     ViewPager mViewPager;
 
-    private static final String TAG = "r3ader";
+
+    //ViewPager.setOffscreenPageLimit(int) way to control how many pages
+
+    private static final String TAG = MainActivity.class.getName();
+    private String[] sections;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // Set up the action bar.
+        sections = getResources().getStringArray(R.array.sections);
         final ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-        int sections = 4;
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager(), this, sections);
@@ -54,12 +59,19 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
                 actionBar.setSelectedNavigationItem(position);
             }
         });
-        String[] sectionNames = {"In Theaters", "DVD Releases", "Opening", "Box Office"};
-        for (int i = 0; i < sections; i++) {
-            actionBar.addTab(actionBar.newTab().setText(sectionNames[i]).setTabListener(this));
+        for (String section : sections) {
+            actionBar.addTab(actionBar.newTab().setText(getName(section)).setTabListener(this));
         }
     }
 
+
+    /* String name in resource files can not have spaces,
+       hence replace the _ with spaces to get the actual desired
+       values.
+    */
+    public String getName(String withUnderscores) {
+        return withUnderscores.replaceAll("_", " ");
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -103,15 +115,9 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         private Context context;
-        private int sections;
-        private String[] LIST = {
-                "http://api.rottentomatoes.com/api/public/v1.0/lists/movies/in_theaters.json?page_limit=24&page=1&country=us&apikey=",
-                "http://api.rottentomatoes.com/api/public/v1.0/lists/dvds/new_releases.json?page_limit=24&page=1&country=us&apikey=",
-                "http://api.rottentomatoes.com/api/public/v1.0/lists/dvd/upcoming.json?page_limit=24&page=1&country=us&apikey=",
-                "http://api.rottentomatoes.com/api/public/v1.0/lists/movies/box_office.json?page_limit=24&page=1&country=us&apikey="
-        };
+        private String[] sections;
 
-        public SectionsPagerAdapter(FragmentManager fm, Context context, int sections) {
+        public SectionsPagerAdapter(FragmentManager fm, Context context, String[] sections) {
             super(fm);
             this.context = context;
             this.sections = sections;
@@ -121,14 +127,13 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            GridAdapter gridAdapter = new GridAdapter(this.context, LIST[position]);
-            return PlaceholderFragment.newInstance(position, context, gridAdapter);
+            return PlaceholderFragment.newInstance(position, context);
         }
 
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return sections;
+            return sections.length;
         }
     }
 
@@ -136,38 +141,59 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
         private int position;
-        private GridAdapter gridAdapter;
+        private static String [] sections;
 
         /**
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PlaceholderFragment newInstance(int sectionNumber, Context context, GridAdapter gridAdapter) {
+        public static PlaceholderFragment newInstance(int sectionNumber, Context context) {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.position = sectionNumber;
+            args.putInt("position", sectionNumber);
             fragment.setArguments(args);
-            fragment.gridAdapter = gridAdapter;
+            fragment.sections = context.getResources().getStringArray(R.array.sections);
+            fragment.position = sectionNumber;
+            Log.d(TAG, "creating a new fragment");
             return fragment;
-        }
-
-        public PlaceholderFragment() {
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            int labelId = getResources().getIdentifier(sections[position], "string", getActivity().getPackageName());
+            String url = getResources().getString(labelId);
+            String KEY = getString(R.string.ROTTEN_KEY);
+            GridAdapter gridAdapter = new GridAdapter(this.getActivity(), url + KEY);
+
+
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             GridView gridview = (GridView) rootView.findViewById(R.id.gridView);
+            Log.w(TAG,gridAdapter.toString());
             gridview.setAdapter(gridAdapter);
+            gridview.setOnItemClickListener((AdapterView<?> parent, View v, int position, long id) -> {
+
+                Movie movie = gridAdapter.getItem(position);
+                Intent intent = new Intent(this.getActivity(), MovieActivity.class);
+                intent.putExtra("movie", movie);
+                this.getActivity().startActivity(intent);
+            });
+            Log.d(TAG, "creating new grid");
             return rootView;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            if(getArguments() != null) {
+                position = getArguments().getInt("position");
+            }
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            Log.w(TAG,"Destroying");
         }
     }
 
